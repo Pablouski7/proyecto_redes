@@ -85,15 +85,22 @@ class Topologia:
         if source not in routers or destination not in routers:
             print("Origen o destino no válido")
             return []
-        
+        visited = set()
         path = [source]
         current = source
-
+        probados = set()
         while current != destination:
-            next_hop = routers[current].get_next_hop(destination)
-            if next_hop is None:
-                print(f"No hay ruta desde {source} hasta {destination}")
-                return path
+            next_hop = routers[current].get_next_hop(destination, visited, probados)
+            if next_hop is None and source not in probados:
+                probados.add(current)
+                path.pop()
+                continue
+            else:
+                visited.add(current)
+                if next_hop is None:
+                    print(f"No hay ruta desde {source} hasta {destination}")
+                    return path
+            
             path.append(next_hop)
             current = next_hop
         

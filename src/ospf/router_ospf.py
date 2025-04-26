@@ -62,9 +62,9 @@ class RouterOSPF:
         """Devuelve la tabla de enrutamiento"""
         return self.routing_table
     
-    def get_next_hop(self, destination):
+    def get_next_hop(self, destination,visited, probados):
         """Obtiene el siguiente salto para alcanzar un destino"""
-        if destination in self.routing_table:
+        if destination in self.routing_table and self.routing_table[destination][0] not in visited:
             return self.routing_table[destination][0]
         return None
 

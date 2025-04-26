@@ -1,6 +1,7 @@
 # -------- MANTENER LA CLASE Ant COMO ESTABA --------
 import random
-
+#Importar librería para utilizar paralelismo
+import threading
 class Ant:
     def __init__(self, starting_node, alpha, beta):
         if starting_node is None:

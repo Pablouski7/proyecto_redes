@@ -2,7 +2,7 @@ import networkx as nx
 import matplotlib.pyplot as plt
 from math import radians, sin, cos, sqrt, atan2
 import random
-from ospf.ospf import Ospf
+from ospf.antNet import AntNet
 from topologia import Topologia
 
 # Función principal para ejecutar todo
@@ -33,12 +33,19 @@ def main():
     plt.title("Grafo generado")
     plt.show()
     
-    ospf_run = Ospf(grafo)
+    antNet_run = AntNet(grafo)
     # Simular OSPF
     
-    routers = ospf_run.simulate_ospf()
-    for key, value in routers.items():
-        print(f"Router: {key}, Rutas: {value.routing_table}")
+    routers = antNet_run.simulate_antNet()
+    for router in routers.values():
+        #imprimir las tablas de los router que tienen valores
+        #en la feromona
+        tabla=router.routing_table
+        for dest, states in tabla.items():
+            for state in states:
+                if state[2] > 0:
+                    router.print_routing_table()
+                    break
     
     # Seleccionar origen y destino para trazar una ruta
     all_nodes = list(grafo.nodes())
