@@ -99,11 +99,14 @@ class RouterAntNet:
             interfaz_camino=path[1]
             #Actualizar la probabilidad de elección de los nodos vecinos
             #De acuerdo a la cantidad de feromona que tienen y al peso de la arista
+            #Se resta por defecto el pheromone_factor a la probabilidad de elección de los nodos vecinos
+            #Si es un pheromone factor positivo, el costo total en la tabla de enrutamiento se reduce
+            #Caso contrario, se aumenta (cuando no se llega al destino)
             if(len(path)>2):
                 for i in range(len(path)-2):
                     for state in routing_table[path[i+2]]:
                         if state[1]!=1 and state[0]== interfaz_camino:
-                            state[2] += pheromone_factor
+                            state[2] -= pheromone_factor
             updateProbs(routing_table, node, alpha, beta, path, graph)
            
                     
