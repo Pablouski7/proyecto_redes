@@ -92,8 +92,17 @@ class Topologia:
         while current != destination:
             next_hop = routers[current].get_next_hop(destination, visited, probados)
             if next_hop is None and source not in probados:
+
+                print("Añadiendo nodo a probados:", current)
+                print("path antes de pop:", path)   
+                print("visited antes de pop:", visited)
                 probados.add(current)
+                visited.remove(current)
                 path.pop()
+                current = path[-1] 
+                
+                print("path después de pop:", path)
+                print("visited después de pop:", visited)
                 continue
             else:
                 visited.add(current)

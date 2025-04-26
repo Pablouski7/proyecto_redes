@@ -42,11 +42,11 @@ class RouterAntNet:
         """Simula la recepción y procesamiento de LSAs (Link State Advertisements)"""
         self.topology_database = grafo
     
-    def calculate_shortest_paths(self,no_ants=50,alpha=0.5,beta=0.5, PFactor=20):
+    def calculate_shortest_paths(self,no_ants=50,alpha=0.5,beta=0.5, PFactor=20,no_elite_ants=5):
         """Ejecuta el algoritmo de AntColony para hallar las probabilidades de elección de los nodos"""
         #Ejecutar antNet
         
-        self.antNet(no_ants,alpha,beta,PFactor)
+        self.antNet(no_ants,alpha,beta,PFactor,no_elite_ants)
 
     def get_routing_table(self):
         """Devuelve la tabla de enrutamiento"""
@@ -84,7 +84,7 @@ class RouterAntNet:
         print("-" * 60)
 
 
-    def antNet (self,no_ants,alpha,beta, PFactor):
+    def antNet (self,no_ants,alpha,beta, PFactor,no_elite_ants):
         graph=self.grafo
         routing_table=self.routing_table
         node=self.node_id
@@ -180,9 +180,16 @@ class RouterAntNet:
             ant = threading.Thread(target=Ant, args=(node, graph, alpha, beta, routing_table, PFactor))
             ants.append(ant)
             ant.start()
-            
+        #Crear un hilo para cada hormiga élite
+        elite_ants = []
+        for i in range(no_elite_ants):
+            ant = threading.Thread(target=Ant, args=(node, graph, alpha, beta, routing_table, PFactor*10))
+            elite_ants.append(ant)
+            ant.start()    
         #Iniciar todos los hilos y esperar a que terminen
         for ant in ants:
+            ant.join()
+        for ant in elite_ants:
             ant.join()
 
 
