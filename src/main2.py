@@ -52,13 +52,9 @@ def main():
     source = None
     destination = None
     
-    # Intentar seleccionar nodos primarios y secundarios de diferentes segmentos
-    for node in all_nodes:
-        if node.startswith("SS0_") or node.startswith("P0"):
-            source = node
-        elif node.startswith("SS4_") or node.startswith("P4"):
-            destination = node
-    
+    random.seed(433)  # Para reproducibilidad
+    source, destination = random.sample(all_nodes, 2)
+
     # Si no se encontraron los nodos específicos, seleccionar los primeros disponibles
     if source is None and len(all_nodes) > 0:
         source = all_nodes[0]

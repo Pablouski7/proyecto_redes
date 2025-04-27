@@ -1,7 +1,5 @@
 from .router_antNet import RouterAntNet
 import threading
-
-# Clase OSPF para simular el protocolo OSPF en una red
 class AntNet:
 
     def __init__(self, grafo):
@@ -20,8 +18,6 @@ class AntNet:
             
             print(f"Router {router.node_id} ha terminado de calcular rutas.")
 
-            
-        """Simula el proceso OSPF en toda la red"""
         routers = {}
         
         # Crear un router para cada nodo
