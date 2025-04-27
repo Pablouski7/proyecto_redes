@@ -16,7 +16,8 @@ class AntNet:
             router.update_topology_database(self.grafo)
             
             # Calcular las rutas más cortas
-            router.calculate_shortest_paths()
+            router.calculate_shortest_paths(self.routers)
+            
             print(f"Router {router.node_id} ha terminado de calcular rutas.")
 
             
@@ -26,12 +27,14 @@ class AntNet:
         # Crear un router para cada nodo
         for node in self.grafo.nodes():
             routers[node] = RouterAntNet(node, self.grafo)
+        self.routers = routers
         #Crear un hilo para cada router
         threads = []
         for router in routers.values():
             thread = threading.Thread(target=simulate_ant_router, args=(router,self))
             threads.append(thread)
             thread.start()
+            # break
         # Esperar a que todos los hilos terminen
         for thread in threads:
             thread.join()

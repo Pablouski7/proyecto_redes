@@ -37,15 +37,15 @@ def main():
     # Simular OSPF
     
     routers = antNet_run.simulate_antNet()
-    for router in routers.values():
-        #imprimir las tablas de los router que tienen valores
-        #en la feromona
-        tabla=router.routing_table
-        for dest, states in tabla.items():
-            for state in states:
-                if state[2] > 0:
-                    router.print_routing_table()
-                    break
+    # for router in routers.values():
+    #     #imprimir las tablas de los router que tienen valores
+    #     #en la feromona
+    #     tabla=router.routing_table
+    #     for dest, states in tabla.items():
+    #         for state in states:
+    #             if state[2] > 0:
+    #                 router.print_routing_table()
+    #                 break
     
     # Seleccionar origen y destino para trazar una ruta
     all_nodes = list(grafo.nodes())
