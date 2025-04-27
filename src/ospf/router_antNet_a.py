@@ -2,7 +2,7 @@ import numpy as np
 import threading
 import logging
 from dataclasses import dataclass
-
+import copy
 # Configuración básica de logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
@@ -22,7 +22,7 @@ class RoutingTable:
     def __init__(self):
         """Inicializa una tabla de enrutamiento vacía."""
         self.table = {}  # {destino: [RouteEntry, RouteEntry, ...]}
-        self.lock = threading.Lock()
+        self.lock = threading.RLock()
     
     def add_destination(self, destination, entries):
         """Añade un destino con sus entradas de ruta."""
@@ -130,13 +130,15 @@ class RouterAntNet:
         # Inicializar la tabla de enrutamiento con una distribución de probabilidad
         # que da más probabilidad a los nodos con menor peso.
         # Se inicializa el valor de feromona en 100
+        # Generar la tabla de rutas de los vecinos
         routing_sub_table = [RouteEntry(neighbor, prob, 100) for neighbor, prob in zip(neighbors, probs)]
 
+        # Copiar la tabla de rutas de los vecinos y asignarla a la tabla de rutas completa
         for nodo in graph.nodes():
             if nodo not in neighbors and nodo != node:
-                self.routing_table[nodo] = routing_sub_table
+                self.routing_table[nodo] = copy.deepcopy(routing_sub_table)  # Copia profunda de la tabla de rutas de los vecinos
             else:
-                self.routing_table[nodo] = [RouteEntry(nodo, 1.0, 100)]  # Probabilidad 1 para el nodo mismo (nodo vecino)  
+                self.routing_table[nodo] = [RouteEntry(nodo, 1.0, 100)]  # Probabilidad 1 para el nodo mismo (nodo vecino)
             
     def update_topology_database(self, grafo):
         """
@@ -144,7 +146,7 @@ class RouterAntNet:
         """
         self.topology_database = grafo
     
-    def calculate_shortest_paths(self, routers, no_ants=20, alpha=0.5, beta=0.5, p_factor=10, no_elite_ants=5):
+    def calculate_shortest_paths(self, routers, no_ants=60, alpha=0.1, beta=2, p_factor=5, no_elite_ants=10):
         """
         Ejecuta el algoritmo de AntColony para hallar las probabilidades de elección de los nodos.
         
@@ -200,6 +202,7 @@ class RouterAntNet:
             print(f"{dest:<10}")
             for entry in entries:
                 print(f"{'':<10} | {entry.neighbor:<15} | {round(entry.probability, 2):<24} | {entry.pheromone:<10}")
+            print()
         print("-" * 60)
 
     def evap_pheromones(self):
@@ -259,6 +262,7 @@ class RouterAntNet:
         routing_table = self.routing_table
         
         with self.lock:
+            self.evap_pheromones()
             if len(path) > 2:
                 interfaz_camino = path[1]
                 for i in range(len(path) - 2):
@@ -269,7 +273,7 @@ class RouterAntNet:
                                 entry.pheromone += pheromone_factor
                             else:
                                 if entry.pheromone < umbral:
-                                    entry.pheromone += pheromone_factor * 10
+                                    entry.pheromone += pheromone_factor * 5
 
             self._update_probabilities(path, alpha, beta)
     
@@ -350,7 +354,6 @@ class RouterAntNet:
         
         # Si se ha llegado al destino, dejar una feromona positiva
         if path[-1] == destination:
-            self.evap_pheromones()
             log_msg = f"Camino {'elite ' if is_elite else ''}encontrado de {node} a {destination}"
             logging.info(log_msg)
             logging.debug(f"Nodos visitados: {visited}")
@@ -370,7 +373,13 @@ class RouterAntNet:
             no_elite_ants: Número de hormigas élite
             routers: Diccionario de routers en la red
         """
-        
+        # Aplicar evaporación de feromonas antes de enviar nuevas hormigas
+
+        # #Ejecutar linealmente las hormigas normales y élite
+        # for _ in range(no_ants):
+        #     self._run_ant(False, alpha, beta, p_factor, routers)
+        # for _ in range(no_elite_ants):
+        #     self._run_ant(True, alpha, beta, p_factor, routers)
         # Crear y ejecutar las hormigas normales
         ants = []
         for _ in range(no_ants):

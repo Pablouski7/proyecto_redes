@@ -34,6 +34,13 @@ class AntNet:
         for node in self.grafo.nodes():
             routers[node] = RouterAntNet(node, self.grafo, self.evaporation_rate)
         self.routers = routers
+        # for router in routers.values():
+        #     router.print_routing_table()
+        #Ejecutar cada router de manera linear
+        
+        # for router in routers.values():
+        #     simulate_ant_router(router, self)
+        #     break
         #Crear un hilo para cada router
         threads = []
         for router in routers.values():
