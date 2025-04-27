@@ -131,7 +131,7 @@ class Topologia:
         probados = set()
         while current != destination:
             next_hop = routers[current].get_next_hop(destination, visited, probados)
-            # routers[current].print_routing_table()
+            routers[current].print_routing_table()
             if next_hop is None and source not in probados:
 
                 print("Añadiendo nodo a probados:", current)

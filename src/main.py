@@ -61,12 +61,12 @@ def main():
     # Simulación AntNet
     print("\nIniciando simulación AntNet...")
     antNet_run = AntNet(grafo, 
-                        no_ants=100, 
-                        alpha=0.2, 
-                        beta=0.5, 
+                        no_ants=60, 
+                        alpha=0.1, 
+                        beta=2, 
                         p_factor=5, 
-                        no_elite_ants=15, 
-                        evaporation_rate=0.1)
+                        no_elite_ants=10, 
+                        evaporation_rate=0.05)
     routers_antNet = antNet_run.simulate_antNet()
     
     # Simulación OSPF

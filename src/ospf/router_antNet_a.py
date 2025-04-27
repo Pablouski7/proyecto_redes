@@ -243,7 +243,7 @@ class RouterAntNet:
         
         return np.random.choice(nodes, p=probs)
     
-    def _update_pheromone(self, path, alpha, beta, pheromone_factor, elite=False, umbral=500):
+    def _update_pheromone(self, path, alpha, beta, pheromone_factor, elite=False, umbral=100):
         """
         Actualiza la cantidad de feromona en las rutas según el camino recorrido.
         
