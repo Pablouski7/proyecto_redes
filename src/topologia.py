@@ -6,9 +6,12 @@ NODE_SIZE = 500
 DEFAULT_COLOR = 'lightblue'
 
 class Topologia:
-    def __init__(self):
+    def __init__(self, seed=None):
         self.grafo = nx.Graph()
         self.aristas_eliminadas = []
+        self.seed = seed
+        if seed is not None:
+            random.seed(seed)
 
     @staticmethod
     def haversine(lat1, lon1, lat2, lon2):
@@ -22,8 +25,24 @@ class Topologia:
         d = R * c
         return d
 
-    def crear_red(self, no_seg_sec, maximo_nodos_sec, ratio_desviacion=0.05):
-        """Crea un grafo de prueba con segmentos primarios y secundarios"""
+    def crear_red(self, no_seg_sec, maximo_nodos_sec, ratio_desviacion=0.05, seed=None):
+        """Crea un grafo de prueba con segmentos primarios y secundarios
+        
+        Args:
+            no_seg_sec: Número de segmentos secundarios
+            maximo_nodos_sec: Máximo número de nodos secundarios por segmento
+            ratio_desviacion: Ratio de desviación para la ubicación de nodos secundarios
+            seed: Semilla para controlar la reproducibilidad (None usa la semilla global)
+        """
+        # Establecer la semilla si se proporciona una nueva
+        if seed is not None:
+            old_state = random.getstate()
+            random.seed(seed)
+            self.seed = seed
+        elif self.seed is not None:
+            old_state = random.getstate()
+            random.seed(self.seed)
+
         G = self.grafo
 
         # Crear nodos primarios
@@ -69,16 +88,37 @@ class Topologia:
         
         self.grafo = G
         self.actualizar_pesos()  # Actualizar pesos después de crear el grafo
+
+        # Restaurar el estado aleatorio anterior si se cambió
+        if seed is not None or self.seed is not None:
+            random.setstate(old_state)
+            
         return G, self.aristas_eliminadas
 
-    def actualizar_pesos(self):
-        """Actualiza los pesos de las aristas basándose en distancia y latencia"""
+    def actualizar_pesos(self, seed=None):
+        """Actualiza los pesos de las aristas basándose en distancia y latencia
+        
+        Args:
+            seed: Semilla para controlar la reproducibilidad de las latencias
+        """
+        # Establecer la semilla si se proporciona una nueva
+        if seed is not None:
+            old_state = random.getstate()
+            random.seed(seed)
+        elif self.seed is not None:
+            old_state = random.getstate()
+            random.seed(self.seed)
+            
         velocidad_luz = 299_792_458  # m/s
         for u, v, data in self.grafo.edges(data=True):
             distancia = data['distance']  # en metros
             tiempo_transmision = (distancia / velocidad_luz) * 1000  # ms
             latencia_random = random.uniform(10, 1000)  # ms
             self.grafo[u][v]['weight'] = tiempo_transmision + latencia_random
+            
+        # Restaurar el estado aleatorio anterior si se cambió
+        if seed is not None or self.seed is not None:
+            random.setstate(old_state)
 
     def trace_route(self, source, destination, routers):
         """Simula traceroute entre source y destination usando tabla de routers"""

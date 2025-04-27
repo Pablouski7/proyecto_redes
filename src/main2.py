@@ -7,7 +7,7 @@ from topologia import Topologia
 
 # Función principal para ejecutar todo
 def main():
-    topologia1 = Topologia()
+    topologia1 = Topologia(seed=433)
     # Crear grafo de prueba
     grafo, aristas_eliminadas = topologia1.crear_red(7, 7, 7)
     
@@ -53,7 +53,7 @@ def main():
     destination = None
     
     random.seed(433)  # Para reproducibilidad
-    source, destination = random.sample(all_nodes, 2)
+    source, destination = random.sample([node for node in all_nodes if 'SS' in node], 2)
 
     # Si no se encontraron los nodos específicos, seleccionar los primeros disponibles
     if source is None and len(all_nodes) > 0:
