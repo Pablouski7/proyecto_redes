@@ -157,64 +157,74 @@ class Topologia:
         return path
 
     def plot(self, path=None):
-        """Visualiza el grafo, resaltando una ruta si se da y usando coordenadas geográficas"""
+        """Visualiza el grafo de forma estética, resaltando rutas si se dan."""
         G = self.grafo
-        plt.figure(figsize=(12, 8))
+        plt.figure(figsize=(16, 10))  # Más grande para que no se vea apretado
         
-        # Crear un diccionario de posiciones basado en las coordenadas lat/long
-        pos = {}
-        for node in G.nodes():
-            # Usar longitud como coordenada x y latitud como coordenada y
-            # La longitud está en rango -180 a 180, la latitud en -90 a 90
-            pos[node] = (G.nodes[node]['lon'], G.nodes[node]['lat'])
+        # Usar spring_layout para más separación
+        pos = nx.spring_layout(G, k=0.1, iterations=50, seed=self.seed)
         
-        # Escalar las posiciones para mejor visualización
-        min_x = min(x for x, y in pos.values())
-        max_x = max(x for x, y in pos.values())
-        min_y = min(y for x, y in pos.values())
-        max_y = max(y for x, y in pos.values())
+        # Colores
+        P_COLOR = '#00b4d8'  # Azul celeste para primarios
+        SS_COLOR = 'purple'  # Amarillo para secundarios
+        PATH_COLOR = 'red'  # Rojo para resaltar rutas
         
-        # Asegurar que el aspecto de la visualización sea adecuado
-        x_range = max_x - min_x
-        y_range = max_y - min_y
+        # Tamaños
+        PRIMARY_SIZE = 700
+        SECONDARY_SIZE = 300
         
-        # Factor de escala para mantener proporciones geográficas
-        # cos(lat_media) ajusta la distorsión de la proyección Mercator
-        lat_media = sum(G.nodes[node]['lat'] for node in G.nodes()) / len(G.nodes())
-        factor_escala = cos(radians(abs(lat_media))) if lat_media != 0 else 1
-        
-        # Reescalar posiciones
-        for node in pos:
-            x, y = pos[node]
-            # Normalizar a rango [0,1] y ajustar por factor de escala para longitud
-            x_norm = (x - min_x) / (x_range if x_range != 0 else 1)
-            y_norm = (y - min_y) / (y_range if y_range != 0 else 1)
-            # Aplicar el factor de escala
-            pos[node] = (x_norm, y_norm)
+        # Clasificar nodos
+        primary_nodes = [n for n in G.nodes if n.startswith('P')]
+        secondary_nodes = [n for n in G.nodes if n.startswith('SS')]
 
+        # Preparar nodos en la ruta si hay
+        path_nodes = set(path) if path else set()
+        path_edges = set()
         if path and len(path) > 1:
-            node_colors = ['red' if node in path else DEFAULT_COLOR for node in G.nodes()]
-            path_edges = set((path[i], path[i+1]) for i in range(len(path)-1))
+            path_edges = {(path[i], path[i+1]) for i in range(len(path)-1)}
+            path_edges |= {(path[i+1], path[i]) for i in range(len(path)-1)}
+        
+        # Dibujar nodos primarios
+        nx.draw_networkx_nodes(G, pos,
+                            nodelist=primary_nodes,
+                            node_color=P_COLOR,
+                            node_size=PRIMARY_SIZE,
+                            )
+        
+        # Dibujar nodos secundarios
+        nx.draw_networkx_nodes(G, pos,
+                            nodelist=secondary_nodes,
+                            node_color=SS_COLOR,
+                            node_size=SECONDARY_SIZE,
+                            )
+        
+        # Dibujar nodos de la ruta en diferente color
+        if path_nodes:
+            nx.draw_networkx_nodes(G, pos,
+                                nodelist=path_nodes,
+                                node_color=PATH_COLOR,
+                                node_size=PRIMARY_SIZE,
+                                )
+        
+        # Dibujar aristas
+        edge_colors = []
+        edge_widths = []
+        for u, v in G.edges():
+            if (u, v) in path_edges or (v, u) in path_edges:
+                edge_colors.append(PATH_COLOR)
+                edge_widths.append(3)
+            elif u.startswith('P') and v.startswith('P'):
+                edge_colors.append('forestgreen')
+                edge_widths.append(2)
+            else:
+                edge_colors.append('gray')
+                edge_widths.append(1)
 
-            # Create a new set for reversed edges
-            reversed_edges = {(v, u) for u, v in path_edges}
-            path_edges.update(reversed_edges)
+        nx.draw_networkx_edges(G, pos, edge_color=edge_colors, width=edge_widths)
+        
+        # Etiquetas
+        nx.draw_networkx_labels(G, pos, font_size=10, font_color='black', font_weight='bold')
 
-            edge_colors = []
-            widths = []
-
-            for u, v in G.edges():
-                if (u, v) in path_edges:
-                    edge_colors.append('red')
-                    widths.append(2.5)
-                else:
-                    edge_colors.append('black')
-                    widths.append(1.0)
-            nx.draw(G, pos=pos, with_labels=True, node_size=NODE_SIZE, node_color=node_colors,
-                    font_size=10, font_weight='bold', edge_color=edge_colors, width=widths)
-        else:
-            nx.draw(G, pos=pos, with_labels=True, node_size=NODE_SIZE, node_color=DEFAULT_COLOR,
-                    font_size=10, font_weight='bold')
-
-        plt.title("Grafo de red" + (" con ruta resaltada" if path else ""))
+        plt.axis('off')
+        plt.tight_layout()
         plt.show()

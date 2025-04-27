@@ -131,14 +131,14 @@ class RouterAntNet:
         # que da más probabilidad a los nodos con menor peso.
         # Se inicializa el valor de feromona en 100
         # Generar la tabla de rutas de los vecinos
-        routing_sub_table = [RouteEntry(neighbor, prob, 100) for neighbor, prob in zip(neighbors, probs)]
+        routing_sub_table = [RouteEntry(neighbor, prob, 50) for neighbor, prob in zip(neighbors, probs)]
 
         # Copiar la tabla de rutas de los vecinos y asignarla a la tabla de rutas completa
         for nodo in graph.nodes():
             if nodo not in neighbors and nodo != node:
                 self.routing_table[nodo] = copy.deepcopy(routing_sub_table)  # Copia profunda de la tabla de rutas de los vecinos
             else:
-                self.routing_table[nodo] = [RouteEntry(nodo, 1.0, 100)]  # Probabilidad 1 para el nodo mismo (nodo vecino)
+                self.routing_table[nodo] = [RouteEntry(nodo, 1.0, 50)]  # Probabilidad 1 para el nodo mismo (nodo vecino)
             
     def update_topology_database(self, grafo):
         """
@@ -273,7 +273,7 @@ class RouterAntNet:
                                 entry.pheromone += pheromone_factor
                             else:
                                 if entry.pheromone < umbral:
-                                    entry.pheromone += pheromone_factor * 20
+                                    entry.pheromone += pheromone_factor * 10
 
             self._update_probabilities(path, alpha, beta)
     
