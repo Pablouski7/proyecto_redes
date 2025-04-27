@@ -200,7 +200,6 @@ class RouterAntNet:
             print(f"{dest:<10}")
             for entry in entries:
                 print(f"{'':<10} | {entry.neighbor:<15} | {round(entry.probability, 2):<24} | {entry.pheromone:<10}")
-            print()
         print("-" * 60)
 
     def evap_pheromones(self):
@@ -351,6 +350,7 @@ class RouterAntNet:
         
         # Si se ha llegado al destino, dejar una feromona positiva
         if path[-1] == destination:
+            self.evap_pheromones()
             log_msg = f"Camino {'elite ' if is_elite else ''}encontrado de {node} a {destination}"
             logging.info(log_msg)
             logging.debug(f"Nodos visitados: {visited}")
@@ -370,8 +370,6 @@ class RouterAntNet:
             no_elite_ants: Número de hormigas élite
             routers: Diccionario de routers en la red
         """
-        # Aplicar evaporación de feromonas antes de enviar nuevas hormigas
-        self.evap_pheromones()
         
         # Crear y ejecutar las hormigas normales
         ants = []

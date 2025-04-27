@@ -41,8 +41,6 @@ class RouterAntNet:
         self.lock = threading.Lock()
         #Locks a nivel de clase ya que cada router unicamente modifica su propia tabla de enrutamiento
         iniciar_routing_table(self)  # {destino: (next_hop, costo)}
-    
-
 
     def update_topology_database(self, grafo):
         """Simula la recepción y procesamiento de LSAs (Link State Advertisements)"""

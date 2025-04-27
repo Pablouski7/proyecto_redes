@@ -1,10 +1,15 @@
 from .router_antNet_a import RouterAntNet
 import threading
 class AntNet:
-
-    def __init__(self, grafo):
+    def __init__(self, grafo, no_ants=20, alpha=0.5, beta=0.5, p_factor=10, no_elite_ants=5, evaporation_rate=0.1):
         self.grafo = grafo
         self.routers = {}
+        self.no_ants = no_ants
+        self.alpha = alpha  
+        self.beta = beta
+        self.p_factor = p_factor
+        self.no_elite_ants = no_elite_ants
+        self.evaporation_rate = evaporation_rate
 
     # Función para simular ACO en toda la red
     def simulate_antNet(self):
@@ -14,7 +19,12 @@ class AntNet:
             router.update_topology_database(self.grafo)
             
             # Calcular las rutas más cortas
-            router.calculate_shortest_paths(self.routers)
+            router.calculate_shortest_paths(self.routers, 
+                                            no_ants=self.no_ants, 
+                                            alpha=self.alpha, 
+                                            beta=self.beta, 
+                                            p_factor=self.p_factor, 
+                                            no_elite_ants=self.no_elite_ants)
             
             print(f"Router {router.node_id} ha terminado de calcular rutas.")
 
@@ -22,7 +32,7 @@ class AntNet:
         
         # Crear un router para cada nodo
         for node in self.grafo.nodes():
-            routers[node] = RouterAntNet(node, self.grafo)
+            routers[node] = RouterAntNet(node, self.grafo, self.evaporation_rate)
         self.routers = routers
         #Crear un hilo para cada router
         threads = []

@@ -131,6 +131,7 @@ class Topologia:
         probados = set()
         while current != destination:
             next_hop = routers[current].get_next_hop(destination, visited, probados)
+            # routers[current].print_routing_table()
             if next_hop is None and source not in probados:
 
                 print("Añadiendo nodo a probados:", current)
@@ -156,9 +157,40 @@ class Topologia:
         return path
 
     def plot(self, path=None):
-        """Visualiza el grafo, resaltando una ruta si se da"""
+        """Visualiza el grafo, resaltando una ruta si se da y usando coordenadas geográficas"""
         G = self.grafo
         plt.figure(figsize=(12, 8))
+        
+        # Crear un diccionario de posiciones basado en las coordenadas lat/long
+        pos = {}
+        for node in G.nodes():
+            # Usar longitud como coordenada x y latitud como coordenada y
+            # La longitud está en rango -180 a 180, la latitud en -90 a 90
+            pos[node] = (G.nodes[node]['lon'], G.nodes[node]['lat'])
+        
+        # Escalar las posiciones para mejor visualización
+        min_x = min(x for x, y in pos.values())
+        max_x = max(x for x, y in pos.values())
+        min_y = min(y for x, y in pos.values())
+        max_y = max(y for x, y in pos.values())
+        
+        # Asegurar que el aspecto de la visualización sea adecuado
+        x_range = max_x - min_x
+        y_range = max_y - min_y
+        
+        # Factor de escala para mantener proporciones geográficas
+        # cos(lat_media) ajusta la distorsión de la proyección Mercator
+        lat_media = sum(G.nodes[node]['lat'] for node in G.nodes()) / len(G.nodes())
+        factor_escala = cos(radians(abs(lat_media))) if lat_media != 0 else 1
+        
+        # Reescalar posiciones
+        for node in pos:
+            x, y = pos[node]
+            # Normalizar a rango [0,1] y ajustar por factor de escala para longitud
+            x_norm = (x - min_x) / (x_range if x_range != 0 else 1)
+            y_norm = (y - min_y) / (y_range if y_range != 0 else 1)
+            # Aplicar el factor de escala
+            pos[node] = (x_norm, y_norm)
 
         if path and len(path) > 1:
             node_colors = ['red' if node in path else DEFAULT_COLOR for node in G.nodes()]
@@ -178,10 +210,10 @@ class Topologia:
                 else:
                     edge_colors.append('black')
                     widths.append(1.0)
-            nx.draw(G, with_labels=True, node_size=NODE_SIZE, node_color=node_colors,
+            nx.draw(G, pos=pos, with_labels=True, node_size=NODE_SIZE, node_color=node_colors,
                     font_size=10, font_weight='bold', edge_color=edge_colors, width=widths)
         else:
-            nx.draw(G, with_labels=True, node_size=NODE_SIZE, node_color=DEFAULT_COLOR,
+            nx.draw(G, pos=pos, with_labels=True, node_size=NODE_SIZE, node_color=DEFAULT_COLOR,
                     font_size=10, font_weight='bold')
 
         plt.title("Grafo de red" + (" con ruta resaltada" if path else ""))
