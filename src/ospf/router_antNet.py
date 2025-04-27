@@ -224,7 +224,7 @@ class RouterAntNet:
                 print("Camino encontrado de " + str(node) + " a " + str(destination))
                 print("Nodos visitados: ", visited)
                 updatePheromone(routing_table, node, alpha, beta, path, graph, PFactor)
-        def eliteAnt(node, graph, alpha, beta, routing_table, PFactor):
+        def eliteAnt(node, graph, alpha, beta, routing_table, PFactor,routers):
             #Elegir un destino aleatorio para la hormiga, el destino no puede ser el nodo actual
             destination = np.random.choice([n for n in graph.nodes() if n != node])
             #Inicializar la ruta de la hormiga, crear un set para los nodos visitados
@@ -232,14 +232,15 @@ class RouterAntNet:
             path = [node]
             visited=set()
             visited.add(node)
-            camino_sin_salida=False
             actual_node=node
             #Iterar la hormiga hasta alcanzar el destino o hasta que se llegue a un camino sin salida
             while path[-1] != destination:
                 #Elegir el siguiente nodo a visitar
-                next_node = choose_next_node(actual_node, routing_table, visited)
+                next_node = choose_next_node(actual_node, routing_table, visited, destination, routers)
                 #Si no hay nodos disponibles, salir del bucle
                 if next_node is None:
+                    print("No hay camino elite encontrado de " + str(node) + " a " + str(destination))
+                    print("Nodos visitados: ", visited)
                     #Añadir feromonas en la tabla de enrutamiento del nodo actual
                     #a los nodos visitados aunque no se haya llegado al destino
                     updatePheromone(routing_table, node, alpha, beta, path, graph, PFactor, True)
@@ -250,6 +251,8 @@ class RouterAntNet:
                 visited.add(next_node)
                 
             if path[-1] == destination:
+                print("Camino elite encontrado de " + str(node) + " a " + str(destination))
+                print("Nodos visitados: ", visited)
                 #Si se ha llegado al destino, dejar una feromona positiva en la ruta
                 #Para cada nodo en la ruta aumentar segun la feromona su probabilidad de elección
                 #La actualización solo se realizaría en la tabla de enrutamiento del nodo actual
@@ -263,17 +266,17 @@ class RouterAntNet:
             ant = threading.Thread(target=Ant, args=(node, graph, alpha, beta, routing_table, PFactor,routers))
             ants.append(ant)
             ant.start()
-        # #Crear un hilo para cada hormiga élite
-        # elite_ants = []
-        # for i in range(no_elite_ants):
-        #     elite_ant = threading.Thread(target=eliteAnt, args=(node, graph, alpha, beta, routing_table, PFactor))
-        #     elite_ants.append(elite_ant)
-        #     elite_ant.start()
-        #Iniciar todos los hilos y esperar a que terminen
+        #Crear un hilo para cada hormiga élite
+        elite_ants = []
+        for i in range(no_elite_ants):
+            elite_ant = threading.Thread(target=eliteAnt, args=(node, graph, alpha, beta, routing_table, PFactor,routers))
+            elite_ants.append(elite_ant)
+            elite_ant.start()
+        # Iniciar todos los hilos y esperar a que terminen
         for ant in ants:
             ant.join()
-        # for ant in elite_ants:
-        #     ant.join()
+        for ant in elite_ants:
+            ant.join()
 
 
 

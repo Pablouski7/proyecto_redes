@@ -38,12 +38,12 @@ def main():
     
     routers = antNet_run.simulate_antNet()
     # for router in routers.values():
-    #     #imprimir las tablas de los router que tienen valores
+    #     #imprimir las tablas de los router que tienen valores mayores a 100
     #     #en la feromona
     #     tabla=router.routing_table
     #     for dest, states in tabla.items():
     #         for state in states:
-    #             if state[2] > 0:
+    #             if state[2] > 100:
     #                 router.print_routing_table()
     #                 break
     
