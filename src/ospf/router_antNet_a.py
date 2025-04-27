@@ -246,7 +246,7 @@ class RouterAntNet:
         
         return np.random.choice(nodes, p=probs)
     
-    def _update_pheromone(self, path, alpha, beta, pheromone_factor, elite=False, umbral=100):
+    def _update_pheromone(self, path, alpha, beta, pheromone_factor, elite=False, umbral=50):
         """
         Actualiza la cantidad de feromona en las rutas según el camino recorrido.
         
@@ -273,7 +273,7 @@ class RouterAntNet:
                                 entry.pheromone += pheromone_factor
                             else:
                                 if entry.pheromone < umbral:
-                                    entry.pheromone += pheromone_factor * 5
+                                    entry.pheromone += pheromone_factor * 20
 
             self._update_probabilities(path, alpha, beta)
     
@@ -390,7 +390,12 @@ class RouterAntNet:
             ants.append(ant)
             ant.start()
         
-        # Crear y ejecutar las hormigas élite
+
+        
+        # Esperar a que terminen todas las hormigas
+        for ant in ants:
+            ant.join()
+                # Crear y ejecutar las hormigas élite
         elite_ants = []
         for _ in range(no_elite_ants):
             elite_ant = threading.Thread(
@@ -399,10 +404,6 @@ class RouterAntNet:
             )
             elite_ants.append(elite_ant)
             elite_ant.start()
-        
-        # Esperar a que terminen todas las hormigas
-        for ant in ants:
-            ant.join()
         for ant in elite_ants:
             ant.join()
 

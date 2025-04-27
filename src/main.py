@@ -6,7 +6,7 @@ from ospf.antNet import AntNet
 from ospf.ospf import Ospf
 from topologia import Topologia
 
-def create_network(n_segments=7, max_nodes=7, ratio_deviation=30, seed=433):
+def create_network(n_segments=17, max_nodes=5, ratio_deviation=30, seed=433):
     """Crear y configurar la topología de red"""
     topologia = Topologia(seed=seed)
     grafo, aristas_eliminadas = topologia.crear_red(n_segments, max_nodes, ratio_deviation)
@@ -52,7 +52,7 @@ def trace_and_compare(topologia, grafo, source, destination, router_tables, algo
 
 def main():
     # Crear y mostrar la topología de red
-    topologia, grafo = create_network(n_segments=3, max_nodes=3, ratio_deviation=30, seed=433)
+    topologia, grafo = create_network(n_segments=7, max_nodes=7, ratio_deviation=30, seed=433)
     topologia.plot()
     
     # Ejecutar simulaciones de los algoritmos
@@ -61,19 +61,19 @@ def main():
     # Simulación AntNet
     print("\nIniciando simulación AntNet...")
     antNet_run = AntNet(grafo, 
-                        no_ants=50, 
-                        alpha=0.1, 
+                        no_ants=60, 
+                        alpha=0.2, 
                         beta=2, 
                         p_factor=5, 
-                        no_elite_ants=10, 
-                        evaporation_rate=0.05)
+                        no_elite_ants=150, 
+                        evaporation_rate=0.005)
     routers_antNet = antNet_run.simulate_antNet()
-    for routers in routers_antNet.values():
-        router=routers.routing_table.table
-        for key, value in router.items():
-            if value[0].probability<1:
-                routers.print_routing_table()
-                break
+    # for routers in routers_antNet.values():
+    #     router=routers.routing_table.table
+    #     for key, value in router.items():
+    #         if value[0].probability<1:
+    #             routers.print_routing_table()
+    #             break
     
     # Simulación OSPF
     print("\nIniciando simulación OSPF...")
