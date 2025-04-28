@@ -2,11 +2,11 @@ import networkx as nx
 import matplotlib.pyplot as plt
 from math import radians, sin, cos, sqrt, atan2
 import random
-from ospf.antNet import AntNet
-from ospf.ospf import Ospf
+from algoritmos.aco_net import AcoNet
+from algoritmos.ospf import Ospf
 from topologia import Topologia
 
-def create_network(n_segments=17, max_nodes=5, ratio_deviation=30, seed=433):
+def create_network(n_segments=7, max_nodes=5, ratio_deviation=30, seed=433):
     """Crear y configurar la topología de red"""
     topologia = Topologia(seed=seed)
     grafo, aristas_eliminadas = topologia.crear_red(n_segments, max_nodes, ratio_deviation)
@@ -58,16 +58,16 @@ def main():
     # Ejecutar simulaciones de los algoritmos
     print("\n==== Ejecutando simulaciones de enrutamiento ====")
     
-    # Simulación AntNet
-    print("\nIniciando simulación AntNet...")
-    antNet_run = AntNet(grafo, 
+    # Simulación AcoNet
+    print("\nIniciando simulación AcoNet...")
+    AcoNet_run = AcoNet(grafo, 
                         no_ants=20, 
                         alpha=0.5, 
                         beta=1.2, 
                         p_factor=10, 
                         no_elite_ants=5, 
                         evaporation_rate=0.005)
-    routers_antNet = antNet_run.simulate_antNet()
+    routers_AcoNet = AcoNet_run.simulate_AcoNet()
 
     print("\nIniciando simulación OSPF...")
     ospf_run = Ospf(grafo)    
@@ -78,25 +78,25 @@ def main():
     
     # Ejecutar y comparar ambos algoritmos
     if source and destination:
-        # Trazar ruta con AntNet
-        path_antnet = trace_and_compare(topologia, grafo, source, destination, routers_antNet, "AntNet")
-        topologia.plot(path_antnet)
+        # Trazar ruta con AcoNet
+        path_AcoNet = trace_and_compare(topologia, grafo, source, destination, routers_AcoNet, "AcoNet")
+        topologia.plot(path_AcoNet)
         
         # Trazar ruta con OSPF
         path_ospf = trace_and_compare(topologia, grafo, source, destination, routers_ospf, "OSPF")
         topologia.plot(path_ospf)
         
         # Comparación final
-        if path_antnet and path_ospf:
-            antnet_length = sum(grafo[path_antnet[i]][path_antnet[i+1]]['weight'] for i in range(len(path_antnet)-1))
+        if path_AcoNet and path_ospf:
+            AcoNet_length = sum(grafo[path_AcoNet[i]][path_AcoNet[i+1]]['weight'] for i in range(len(path_AcoNet)-1))
             ospf_length = sum(grafo[path_ospf[i]][path_ospf[i+1]]['weight'] for i in range(len(path_ospf)-1))
             
             print("\n==== Comparación de algoritmos ====")
-            print(f"Longitud de ruta AntNet: {antnet_length:.2f}")
+            print(f"Longitud de ruta AcoNet: {AcoNet_length:.2f}")
             print(f"Longitud de ruta OSPF: {ospf_length:.2f}")
-            print(f"Diferencia (AntNet - OSPF): {antnet_length - ospf_length:.2f}")
+            print(f"Diferencia (AcoNet - OSPF): {AcoNet_length - ospf_length:.2f}")
             
-            if path_antnet == path_ospf:
+            if path_AcoNet == path_ospf:
                 print("Ambos algoritmos calcularon la misma ruta.")
             else:
                 print("Los algoritmos calcularon rutas diferentes.")

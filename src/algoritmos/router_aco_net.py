@@ -3,6 +3,7 @@ import threading
 import logging
 from dataclasses import dataclass
 import copy
+
 # Configuración básica de logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
@@ -89,15 +90,15 @@ class RoutingTable:
                 for entry in entries:
                     entry.probability = entry.pheromone / sum_pheromones
 
-class RouterAntNet:
+class RouterAcoNet:
     """
-    Implementación de un router que utiliza el algoritmo AntNet para el enrutamiento.
-    AntNet es un algoritmo bioinspirado basado en colonias de hormigas para el enrutamiento adaptativo.
+    Implementación de un router que utiliza el algoritmo AcoNet para el enrutamiento.
+    AcoNet es un algoritmo bioinspirado basado en colonias de hormigas para el enrutamiento adaptativo.
     """
                 
     def __init__(self, node_id, grafo, evaporation_rate=0.05):
         """
-        Inicializa un router AntNet.
+        Inicializa un router AcoNet.
         
         Args:
             node_id: Identificador único del router
@@ -158,7 +159,7 @@ class RouterAntNet:
             p_factor: Factor que controla la cantidad de feromona a depositar
             no_elite_ants: Número de hormigas élite
         """
-        self.antNet(no_ants, alpha, beta, p_factor, no_elite_ants, routers)
+        self.AcoNet(no_ants, alpha, beta, p_factor, no_elite_ants, routers)
 
     def get_routing_table(self):
         """
@@ -361,9 +362,9 @@ class RouterAntNet:
         
         return path
 
-    def antNet(self, no_ants, alpha, beta, p_factor, no_elite_ants, routers):
+    def AcoNet(self, no_ants, alpha, beta, p_factor, no_elite_ants, routers):
         """
-        Implementa el algoritmo AntNet para actualizar la tabla de enrutamiento.
+        Implementa el algoritmo AcoNet para actualizar la tabla de enrutamiento.
         
         Args:
             no_ants: Número de hormigas normales
@@ -373,14 +374,6 @@ class RouterAntNet:
             no_elite_ants: Número de hormigas élite
             routers: Diccionario de routers en la red
         """
-        # Aplicar evaporación de feromonas antes de enviar nuevas hormigas
-
-        # #Ejecutar linealmente las hormigas normales y élite
-        # for _ in range(no_ants):
-        #     self._run_ant(False, alpha, beta, p_factor, routers)
-        # for _ in range(no_elite_ants):
-        #     self._run_ant(True, alpha, beta, p_factor, routers)
-        # Crear y ejecutar las hormigas normales
         ants = []
         for _ in range(no_ants):
             ant = threading.Thread(
@@ -389,9 +382,7 @@ class RouterAntNet:
             )
             ants.append(ant)
             ant.start()
-        
 
-        
         # Esperar a que terminen todas las hormigas
         for ant in ants:
             ant.join()
@@ -406,10 +397,3 @@ class RouterAntNet:
             elite_ant.start()
         for ant in elite_ants:
             ant.join()
-
-
-
-
-
-
-

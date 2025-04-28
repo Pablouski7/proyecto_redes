@@ -1,6 +1,6 @@
-from .router_antNet_a import RouterAntNet
+from .router_aco_net import RouterAcoNet
 import threading
-class AntNet:
+class AcoNet:
     def __init__(self, grafo, no_ants=20, alpha=0.5, beta=0.5, p_factor=10, no_elite_ants=5, evaporation_rate=0.1):
         self.grafo = grafo
         self.routers = {}
@@ -12,7 +12,7 @@ class AntNet:
         self.evaporation_rate = evaporation_rate
 
     # Función para simular ACO en toda la red
-    def simulate_antNet(self):
+    def simulate_AcoNet(self):
         def simulate_ant_router(router, self):
             """Simula el proceso ACO en un router específico"""
             # Actualizar la base de datos de topología
@@ -32,15 +32,9 @@ class AntNet:
         
         # Crear un router para cada nodo
         for node in self.grafo.nodes():
-            routers[node] = RouterAntNet(node, self.grafo, self.evaporation_rate)
+            routers[node] = RouterAcoNet(node, self.grafo, self.evaporation_rate)
         self.routers = routers
-        # for router in routers.values():
-        #     router.print_routing_table()
-        #Ejecutar cada router de manera linear
-        
-        # for router in routers.values():
-        #     simulate_ant_router(router, self)
-        #     break
+
         #Crear un hilo para cada router
         threads = []
         for router in routers.values():
@@ -48,6 +42,7 @@ class AntNet:
             threads.append(thread)
             thread.start()
             # break
+            
         # Esperar a que todos los hilos terminen
         for thread in threads:
             thread.join()

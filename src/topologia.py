@@ -2,9 +2,8 @@ import networkx as nx
 import matplotlib.pyplot as plt
 from math import radians, sin, cos, sqrt, atan2
 import random
-NODE_SIZE = 500
-DEFAULT_COLOR = 'lightblue'
 
+# Clase para crear y gestionar la topología de la red
 class Topologia:
     def __init__(self, seed=None):
         self.grafo = nx.Graph()
